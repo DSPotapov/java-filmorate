@@ -10,9 +10,9 @@ import java.time.Instant;
  */
 @Data
 public class Film {
-    int id;
+    Long id;
     String name;
     String description;
-    Instant releaseDate;
-    Duration duration;
+    final String releaseDate;
+    final Duration duration;
 }
