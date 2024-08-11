@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
@@ -26,19 +27,19 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@RequestBody User newUser) {
+    public User create(@Valid @RequestBody User newUser) {
         log.debug("POST create: {}", newUser);
         // проверяем выполнение необходимых условий
-        if (newUser.getEmail() == null || newUser.getEmail().isBlank()) {
-            throw new ValidationException("Имейл должен быть указан");
-        }
-//        TODO добавить валидацию
-        if (!newUser.getEmail().contains("@")) {
-            throw new ValidationException("Некорректный имейл -> должен содержать @");
-        }
-        if (newUser.getLogin() == null || newUser.getLogin().isBlank()) {
-            throw new ValidationException("Логин должен быть указан");
-        }
+//        if (newUser.getEmail() == null || newUser.getEmail().isBlank()) {
+//            throw new ValidationException("Имейл должен быть указан");
+//        }
+////        TODO добавить валидацию
+//        if (!newUser.getEmail().contains("@")) {
+//            throw new ValidationException("Некорректный имейл -> должен содержать @");
+//        }
+//        if (newUser.getLogin() == null || newUser.getLogin().isBlank()) {
+//            throw new ValidationException("Логин должен быть указан");
+//        }
         if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
         }
@@ -74,15 +75,12 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
+    public User update(@Valid @RequestBody User newUser) {
 
         log.debug("PUT update: {}", newUser.toString());
         // проверяем необходимые условия
-        if (newUser.getId() == null) {
-            throw new ValidationException("Id должен быть указан");
-        }
-        if (!newUser.getEmail().contains("@")) {
-            throw new ValidationException("Некорректный имейл -> должен содержать @");
+        if (newUser.getId() == null){
+            throw new ValidationException("Необходимо указать id");
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -91,13 +89,16 @@ public class UserController {
         }
 
         if (users.containsKey(newUser.getId())) {
+
             User oldUser = users.get(newUser.getId());
 
-            // если публикация найдена и все условия соблюдены, обновляем её содержимое
-            if (newUser.getEmail() != null && !newUser.getEmail().isBlank()) {
-                oldUser.setEmail(newUser.getEmail());
-            }
-            if (newUser.getName() != null && !newUser.getName().isBlank()) {
+            oldUser.setEmail(newUser.getEmail());
+            oldUser.setLogin(newUser.getLogin());
+            oldUser.setBirthday(newUser.getBirthday());
+
+            if (newUser.getName().isBlank()) {
+                oldUser.setName(newUser.getLogin());
+            } else {
                 oldUser.setName(newUser.getName());
             }
 
