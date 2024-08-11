@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -27,12 +28,10 @@ public class FilmController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film create(@Valid @RequestBody Film newFilm) {
         log.debug("POST create: {}", newFilm);
         // проверяем выполнение необходимых условий
-//        if (newFilm.getName() == null || newFilm.getName().isBlank()) {
-//            throw new ValidationException("Название фильма должно быть указано");
-//        }
         if (newFilm.getDescription().length() > 200) {
             throw new ValidationException("Описание должно быть не больше 200 символов");
         }
@@ -40,10 +39,6 @@ public class FilmController {
         if (LocalDate.parse(newFilm.getReleaseDate(), formatter).isBefore(BIRTHDAY_OF_CINEMA)) {
             throw new ValidationException("Фильм мог выйти только после 28 декабря 1895 года");
         }
-//        if (newFilm.getDuration() < 0) {
-//            log.debug("POST create: Некорректная длительность фильма: {}", newFilm.getDuration());
-//            throw new ValidationException("Длительность фильма не может быть отрицательной");
-//        }
 
         newFilm.setId(getNextId());
 

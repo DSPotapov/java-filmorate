@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -26,20 +27,17 @@ public class UserController {
         return users.values();
     }
 
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        log.debug("id is:{}", id);
+        return users.get(id);
+    }
+
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User newUser) {
         log.debug("POST create: {}", newUser);
-        // проверяем выполнение необходимых условий
-//        if (newUser.getEmail() == null || newUser.getEmail().isBlank()) {
-//            throw new ValidationException("Имейл должен быть указан");
-//        }
-////        TODO добавить валидацию
-//        if (!newUser.getEmail().contains("@")) {
-//            throw new ValidationException("Некорректный имейл -> должен содержать @");
-//        }
-//        if (newUser.getLogin() == null || newUser.getLogin().isBlank()) {
-//            throw new ValidationException("Логин должен быть указан");
-//        }
+
         if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
         }
@@ -79,7 +77,7 @@ public class UserController {
 
         log.debug("PUT update: {}", newUser.toString());
         // проверяем необходимые условия
-        if (newUser.getId() == null){
+        if (newUser.getId() == null) {
             throw new ValidationException("Необходимо указать id");
         }
 
