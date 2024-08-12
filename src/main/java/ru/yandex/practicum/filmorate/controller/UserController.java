@@ -23,6 +23,7 @@ public class UserController {
     private final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public Collection<User> findAll() {
         return users.values();
     }
