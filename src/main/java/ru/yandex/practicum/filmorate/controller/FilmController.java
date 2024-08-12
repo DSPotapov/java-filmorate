@@ -19,7 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final LocalDate BIRTHDAYOFCINEMA = LocalDate.of(1895, Month.DECEMBER, 28);
+    private final LocalDate birthdayOfCinema = LocalDate.of(1895, Month.DECEMBER, 28);
     private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
@@ -36,7 +36,7 @@ public class FilmController {
             throw new ValidationException("Описание должно быть не больше 200 символов");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        if (LocalDate.parse(newFilm.getReleaseDate(), formatter).isBefore(BIRTHDAYOFCINEMA)) {
+        if (LocalDate.parse(newFilm.getReleaseDate(), formatter).isBefore(birthdayOfCinema)) {
             throw new ValidationException("Фильм мог выйти только после 28 декабря 1895 года");
         }
 
@@ -66,7 +66,7 @@ public class FilmController {
             throw new ValidationException("Описание должно быть не больше 200 символов");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        if (LocalDate.parse(newFilm.getReleaseDate(), formatter).isBefore(BIRTHDAYOFCINEMA)) {
+        if (LocalDate.parse(newFilm.getReleaseDate(), formatter).isBefore(birthdayOfCinema)) {
             throw new ValidationException("Фильм мог выйти только после 28 декабря 1895 года");
         }
 
