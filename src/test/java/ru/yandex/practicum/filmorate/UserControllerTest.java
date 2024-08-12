@@ -1,47 +1,54 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.extern.slf4j.Slf4j;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Slf4j
-@ExtendWith(MockitoExtension.class)
-@SpringBootTest
+@WebMvcTest(UserController.class)
 public class UserControllerTest {
 
     @Autowired
-    UserController controller;
+    private MockMvc mockMvc;
+
+    @Autowired
+    Gson gson;
 
     @Test
-    public void shouldReturnAllUsers() {
+    public void createUserIsValid() throws Exception {
         User user = User.builder()
                 .email("home@mail.ru")
                 .login("login1")
                 .birthday("1987-10-10")
                 .build();
-        assertEquals(0, controller.findAll().size());
-        controller.create(user);
-        log.info(controller.findAll().toString());
-        assertEquals(1, controller.findAll().size());
-        User user1 = User.builder()
-                .email("homemail.ru")
-                .login("")
-                .birthday("1987-10-10")
-                .build();
-        controller.create(user1);
-
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(gson.toJson(user)))
+                .andExpect(status().isCreated());
     }
 
     @Test
-    public void testUserValidation() {
+    void createUserFailedWhenEmailIsNotValid() throws Exception {
+        User user = User.builder().email("homemail.ru").login("login1").birthday("1987-10-10").build();
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(gson.toJson(user)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createUserFailedWhenLoginIsEmpty() throws Exception {
+        User user = User.builder().email("somethingwrongwiththis*email").birthday("1987-10-10").build();
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(gson.toJson(user)))
+                .andExpect(status().isBadRequest());
     }
 }
