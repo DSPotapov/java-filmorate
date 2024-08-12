@@ -78,8 +78,8 @@ public class UserControllerTest {
     @Test
     public void createUserFailedWhenLoginIsEmpty() throws Exception {
         User user = User.builder()
-                .email("home@mail.ru").
-                birthday("1987-10-10")
+                .email("home@mail.ru")
+                .birthday("1987-10-10")
                 .build();
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
