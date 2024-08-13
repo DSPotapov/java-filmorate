@@ -8,12 +8,12 @@ import lombok.Data;
 @Data
 @Builder
 public class User {
-    Long id;
+    private Long id;
     @Email
     @NotBlank
-    String email;
+    private String email;
     @NotBlank
-    String login;
-    String name;
-    String birthday;
+    private String login;
+    private String name;
+    private String birthday;
 }

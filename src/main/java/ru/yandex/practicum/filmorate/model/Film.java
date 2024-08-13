@@ -11,12 +11,12 @@ import lombok.Data;
 @Data
 @Builder
 public class Film {
-    Long id;
+    private Long id;
     @NotBlank
-    String name;
+    private String name;
     @NotBlank
-    String description;
+    private String description;
     String releaseDate;
     @Positive
-    int duration;
+    private int duration;
 }
