@@ -7,8 +7,13 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 @Service
 public class UserService {
 
+    private final UserStorage userStorage;
+
     @Autowired
-    UserStorage storage;
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
+
     /*
     Создайте UserService, который будет отвечать за такие операции с пользователями, как добавление в друзья,
     удаление из друзей, вывод списка общих друзей. Пока пользователям не надо одобрять заявки в друзья — добавляем сразу.
