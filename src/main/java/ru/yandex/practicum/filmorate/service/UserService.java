@@ -2,7 +2,11 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+
+import java.util.Collection;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -14,9 +18,37 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    /*
-    Создайте UserService, который будет отвечать за такие операции с пользователями, как добавление в друзья,
-    удаление из друзей, вывод списка общих друзей. Пока пользователям не надо одобрять заявки в друзья — добавляем сразу.
-    То есть если Лена стала другом Саши, то это значит, что Саша теперь друг Лены.
-     */
+    public Collection<User> values() {
+        return userStorage.values();
+    }
+
+    public User get(Long id) {
+        return userStorage.get(id);
+    }
+
+    public void put(Long id, User user) {
+        userStorage.put(id, user);
+    }
+
+    public Set<Long> keySet() {
+        return userStorage.keySet();
+    }
+
+    public boolean containsKey(Long id) {
+        return userStorage.containsKey(id);
+    }
+
+    public void addUserFriends(Long id, Long friendId) {
+        User user = userStorage.get(id);
+        user.getFriends().add(friendId);
+        User friend = userStorage.get(friendId);
+        friend.getFriends().add(id);
+    }
+
+    public void deleteUserFriend(Long id, Long friendId) {
+        User user = userStorage.get(id);
+        user.getFriends().remove(friendId);
+        User friend = userStorage.get(friendId);
+        friend.getFriends().remove(id);
+    }
 }

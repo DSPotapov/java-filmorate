@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
@@ -22,7 +23,7 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
     private final LocalDate birthdayOfCinema = LocalDate.of(1895, Month.DECEMBER, 28);
-    private final Map<Long, Film> films = new HashMap<>();
+
     private final FilmService filmService;
 
     @Autowired
@@ -32,7 +33,13 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
-        return films.values();
+        return filmService.values();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable Long id) {
+        log.debug("id is:{}", id);
+        return filmService.get(id);
     }
 
     @PostMapping
@@ -51,12 +58,12 @@ public class FilmController {
         newFilm.setId(getNextId());
 
         // сохраняем нового  пользователя в памяти приложения
-        films.put(newFilm.getId(), newFilm);
+        filmService.put(newFilm.getId(), newFilm);
         return newFilm;
     }
 
     private long getNextId() {
-        long currentMaxId = films.keySet()
+        long currentMaxId = filmService.keySet()
                 .stream()
                 .mapToLong(id -> id)
                 .max()
@@ -78,8 +85,8 @@ public class FilmController {
             throw new ValidationException("Фильм мог выйти только после 28 декабря 1895 года");
         }
 
-        if (films.containsKey(newFilm.getId())) {
-            Film oldFilm = films.get(newFilm.getId());
+        if (filmService.containsKey(newFilm.getId())) {
+            Film oldFilm = filmService.get(newFilm.getId());
 
             // если публикация найдена и все условия соблюдены, обновляем её содержимое
             if (newFilm.getName() != null && !newFilm.getName().isBlank()) {
@@ -97,4 +104,5 @@ public class FilmController {
 
         throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден.");
     }
+
 }

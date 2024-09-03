@@ -14,15 +14,12 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-
-    private final Map<Long, User> users = new HashMap<>();
 
     private final UserService userService;
 
@@ -34,13 +31,13 @@ public class UserController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Collection<User> findAll() {
-        return users.values();
+        return userService.values();
     }
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable Long id) {
         log.debug("id is:{}", id);
-        return users.get(id);
+        return userService.get(id);
     }
 
     @PostMapping
@@ -57,7 +54,7 @@ public class UserController {
             throw new ValidationException("Дата рождения не может быть в будущем: " + newUser.getBirthday());
         }
 
-        for (User user : users.values()) {
+        for (User user : userService.values()) {
             if (user.getLogin().equals(newUser.getLogin())) {
                 throw new DuplicatedDataException("Этот логин уже используется");
             }
@@ -69,12 +66,12 @@ public class UserController {
         newUser.setId(getNextId());
 
         // сохраняем нового  пользователя в памяти приложения
-        users.put(newUser.getId(), newUser);
+        userService.put(newUser.getId(), newUser);
         return newUser;
     }
 
     private long getNextId() {
-        long currentMaxId = users.keySet()
+        long currentMaxId = userService.keySet()
                 .stream()
                 .mapToLong(id -> id)
                 .max()
@@ -96,9 +93,9 @@ public class UserController {
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
 
-        if (users.containsKey(newUser.getId())) {
+        if (userService.containsKey(newUser.getId())) {
 
-            User oldUser = users.get(newUser.getId());
+            User oldUser = userService.get(newUser.getId());
 
             oldUser.setEmail(newUser.getEmail());
             oldUser.setLogin(newUser.getLogin());
@@ -116,4 +113,15 @@ public class UserController {
         throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден.");
     }
 
+    @PutMapping("{id}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addUserFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addUserFriends(id, friendId);
+    }
+
+    @DeleteMapping("{id}/friends/{friendId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUserFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteUserFriend(id, friendId);
+    }
 }
