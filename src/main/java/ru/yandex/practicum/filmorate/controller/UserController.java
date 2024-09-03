@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -38,6 +37,11 @@ public class UserController {
     public User getUser(@PathVariable Long id) {
         log.debug("id is:{}", id);
         return userService.get(id);
+    }
+
+    @GetMapping("{id}/friends")
+    public Collection<User> getUserFriends(@PathVariable Long id) {
+        return userService.getUserFriends(id);
     }
 
     @PostMapping

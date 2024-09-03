@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -50,5 +51,14 @@ public class UserService {
         user.getFriends().remove(friendId);
         User friend = userStorage.get(friendId);
         friend.getFriends().remove(id);
+    }
+
+    public Collection<User> getUserFriends(Long id) {
+        Set<User> userFriends = new HashSet<>();
+        User user = userStorage.get(id);
+        for (Long friendId : user.getFriends()) {
+            userFriends.add(userStorage.get(friendId));
+        }
+        return userFriends;
     }
 }
