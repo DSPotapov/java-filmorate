@@ -44,6 +44,11 @@ public class UserController {
         return userService.getUserFriends(id);
     }
 
+    @GetMapping("{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId){
+        return userService.getCommonFriends(id, otherId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User newUser) {

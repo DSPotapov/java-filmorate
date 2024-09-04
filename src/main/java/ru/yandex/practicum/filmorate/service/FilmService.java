@@ -7,7 +7,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -39,4 +41,25 @@ public class FilmService {
     public boolean containsKey(Long id) {
         return filmStorage.containsKey(id);
     }
+
+    public void addLike(Long id, Long userId) {
+        Film film = filmStorage.get(id);
+        film.getUserLikes().add(userId);
+        film.setRating(film.getUserLikes().size());
+    }
+
+    public void deleteLike(Long id, Long userId) {
+        Film film = filmStorage.get(id);
+        film.getUserLikes().remove(userId);
+        film.setRating(film.getUserLikes().size());
+    }
+
+    public Collection<Film> findAll(int count) {
+        return filmStorage.values().stream()
+                .sorted(Comparator.comparingInt(Film::getRating).reversed())
+                .limit(count)
+                .toList();
+    }
+
+
 }

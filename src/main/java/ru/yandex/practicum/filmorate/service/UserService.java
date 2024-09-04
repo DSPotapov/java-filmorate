@@ -61,4 +61,17 @@ public class UserService {
         }
         return userFriends;
     }
+
+    public Collection<User> getCommonFriends(Long id, Long otherId) {
+        Set<User> commonFriends = new HashSet<>();
+        User user = userStorage.get(id);
+        Set<Long> otherUserFriends = userStorage.get(otherId).getFriends();
+        for (Long commonId : user.getFriends()) {
+            if (otherUserFriends.contains(commonId)) {
+                commonFriends.add(userStorage.get(commonId));
+            }
+        }
+        return commonFriends;
+    }
+
 }

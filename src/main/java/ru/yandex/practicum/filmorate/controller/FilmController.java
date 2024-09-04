@@ -42,6 +42,15 @@ public class FilmController {
         return filmService.get(id);
     }
 
+    @GetMapping("popular")
+    public Collection<Film> findAll(@RequestParam(defaultValue = "10") int count) {
+        if (count < 1) {
+            throw new ValidationException("Число для поиcка фильмов должен быть больше нуля");
+        }
+
+        return filmService.findAll(count);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film create(@Valid @RequestBody Film newFilm) {
@@ -57,7 +66,7 @@ public class FilmController {
 
         newFilm.setId(getNextId());
 
-        // сохраняем нового  пользователя в памяти приложения
+        // сохраняем нового пользователя в памяти приложения
         filmService.put(newFilm.getId(), newFilm);
         return newFilm;
     }
@@ -72,6 +81,7 @@ public class FilmController {
     }
 
     @PutMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film update(@Valid @RequestBody Film newFilm) {
 
         log.debug("PUT update: {}", newFilm.toString());
@@ -105,4 +115,21 @@ public class FilmController {
         throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден.");
     }
 
+    @PutMapping("{id}/like/{userId}")
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("{id}/like/{userId}")
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        filmService.deleteLike(id, userId);
+    }
+
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ErrorResponse handle(final IncorrectCountException e) {
+//        return new ErrorResponse(
+//                "Ошибка с параметром count.", e.getMessage()
+//        );
+//    }
 }

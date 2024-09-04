@@ -4,7 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -12,6 +15,8 @@ import java.util.Set;
  */
 @Data
 @Builder
+@Getter
+@Setter
 public class Film {
     private Long id;
     @NotBlank
@@ -22,5 +27,6 @@ public class Film {
     @Positive
     private int duration;
     private Set<Long> userLikes;
+    private int rating = 0;
 
 }
