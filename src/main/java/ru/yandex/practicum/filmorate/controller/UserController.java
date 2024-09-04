@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @GetMapping("{id}/friends/common/{otherId}")
-    public Collection<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId){
+    public Collection<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 
@@ -74,17 +74,13 @@ public class UserController {
 
         newUser.setId(getNextId());
 
-        // сохраняем нового  пользователя в памяти приложения
+        // сохраняем нового пользователя в памяти приложения
         userService.put(newUser.getId(), newUser);
         return newUser;
     }
 
     private long getNextId() {
-        long currentMaxId = userService.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
+        long currentMaxId = userService.keySet().stream().mapToLong(id -> id).max().orElse(0);
         return ++currentMaxId;
     }
 
@@ -132,5 +128,23 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteUserFriend(@PathVariable Long id, @PathVariable Long friendId) {
         userService.deleteUserFriend(id, friendId);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        return new ErrorResponse("Указаны некорректные данные", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDuplicatedDataException(final ValidationException e) {
+        return new ErrorResponse("Повторяющееся значение", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(final ValidationException e) {
+        return new ErrorResponse("Искомый объект не найден", e.getMessage());
     }
 }
