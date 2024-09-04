@@ -165,9 +165,9 @@ public class UserController {
             throw new NullPointerException("Не указан один из параметров");
         }
 
-        if (!userService.containsKey(id)) {
-            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
-        }
+//        if (!userService.containsKey(id)) {
+//            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
+//        }
 
         userService.deleteUserFriend(id, friendId);
     }
@@ -200,6 +200,6 @@ public class UserController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNullPointerException(final NullPointerException e) {
-        return new ErrorResponse("Некорректное значение", e.getMessage());
+        return new ErrorResponse("несуществующее значение", e.getMessage());
     }
 }

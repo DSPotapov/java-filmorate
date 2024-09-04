@@ -45,7 +45,6 @@ public class FilmController {
         if (count < 1) {
             throw new ValidationException("Число для поиcка фильмов должен быть больше нуля");
         }
-
         return filmService.findAll(count);
     }
 
