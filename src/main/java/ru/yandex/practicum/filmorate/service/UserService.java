@@ -39,7 +39,7 @@ public class UserService {
         return userStorage.containsKey(id);
     }
 
-    public void addUserFriends(Long id, Long friendId) {
+    public void addUserFriend(Long id, Long friendId) {
         User user = userStorage.get(id);
         user.getFriends().add(friendId);
         User friend = userStorage.get(friendId);

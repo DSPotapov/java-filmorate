@@ -28,6 +28,7 @@ public class FilmController {
         this.filmService = filmService;
     }
 
+    // GET
     @GetMapping
     public Collection<Film> findAll() {
         return filmService.values();
@@ -48,6 +49,7 @@ public class FilmController {
         return filmService.findAll(count);
     }
 
+    // POST
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film create(@Valid @RequestBody Film newFilm) {
@@ -77,8 +79,9 @@ public class FilmController {
         return ++currentMaxId;
     }
 
+    // PUT
     @PutMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public Film update(@Valid @RequestBody Film newFilm) {
 
         log.debug("PUT update: {}", newFilm.toString());
@@ -113,15 +116,34 @@ public class FilmController {
     }
 
     @PutMapping("{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+
+        if (id == null || userId == null) {
+            throw new NullPointerException("Не указан один из параметров");
+        }
+
+        if (!filmService.containsKey(id)) {
+            throw new NotFoundException("Фильм " + id + "не найден");
+        }
         filmService.addLike(id, userId);
     }
 
+    // DELETE
     @DeleteMapping("{id}/like/{userId}")
     public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+
+        if (id == null || userId == null) {
+            throw new NullPointerException("Не указан один из параметров");
+        }
+
+        if (!filmService.containsKey(id)) {
+            throw new NotFoundException("Фильм " + id + "не найден");
+        }
         filmService.deleteLike(id, userId);
     }
 
+    // ExceptionHandlers
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final ValidationException e) {
@@ -132,9 +154,21 @@ public class FilmController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(final ValidationException e) {
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
         return new ErrorResponse(
                 "Искомый объект не найден", e.getMessage()
         );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalStateException(final IllegalStateException e) {
+        return new ErrorResponse("Некорректное значение", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNullPointerException(final NullPointerException e) {
+        return new ErrorResponse("Некорректное значение", e.getMessage());
     }
 }

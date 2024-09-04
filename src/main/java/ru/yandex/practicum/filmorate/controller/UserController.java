@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -27,6 +28,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    //GET
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Collection<User> findAll() {
@@ -41,14 +43,27 @@ public class UserController {
 
     @GetMapping("{id}/friends")
     public Collection<User> getUserFriends(@PathVariable Long id) {
+
+        if (!userService.containsKey(id)) {
+            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
+        }
+
         return userService.getUserFriends(id);
     }
 
     @GetMapping("{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        if (!userService.containsKey(id)) {
+            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
+        }
+        if (!userService.containsKey(otherId)) {
+            throw new NotFoundException("Пользователь " + otherId + "не найден, нельзя добавить другом несуществующего пользователя");
+        }
+
         return userService.getCommonFriends(id, otherId);
     }
 
+    // POST
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User newUser) {
@@ -84,7 +99,9 @@ public class UserController {
         return ++currentMaxId;
     }
 
+    // PUT
     @PutMapping
+    @ResponseStatus(HttpStatus.OK)
     public User update(@Valid @RequestBody User newUser) {
 
         log.debug("PUT update: {}", newUser.toString());
@@ -121,15 +138,41 @@ public class UserController {
     @PutMapping("{id}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
     public void addUserFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.addUserFriends(id, friendId);
+
+        if (id == null || friendId == null) {
+            throw new NullPointerException("Не указан один из параметров");
+        }
+
+        if (Objects.equals(id, friendId)) {
+            throw new DuplicatedDataException("Нельзя добавить другом самого пользователя");
+        }
+        if (!userService.containsKey(id)) {
+            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
+        }
+        if (!userService.containsKey(friendId)) {
+            throw new NotFoundException("Пользователь " + friendId + "не найден, нельзя добавить другом несуществующего пользователя");
+        }
+
+        userService.addUserFriend(id, friendId);
     }
 
+    // DELETE
     @DeleteMapping("{id}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteUserFriend(@PathVariable Long id, @PathVariable Long friendId) {
+
+        if (id == null || friendId == null) {
+            throw new NullPointerException("Не указан один из параметров");
+        }
+
+        if (!userService.containsKey(id)) {
+            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
+        }
+
         userService.deleteUserFriend(id, friendId);
     }
 
+    // ExceptionHandlers
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final ValidationException e) {
@@ -138,13 +181,25 @@ public class UserController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleDuplicatedDataException(final ValidationException e) {
+    public ErrorResponse handleDuplicatedDataException(final DuplicatedDataException e) {
         return new ErrorResponse("Повторяющееся значение", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(final ValidationException e) {
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
         return new ErrorResponse("Искомый объект не найден", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalStateException(final IllegalStateException e) {
+        return new ErrorResponse("Некорректное значение", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNullPointerException(final NullPointerException e) {
+        return new ErrorResponse("Некорректное значение", e.getMessage());
     }
 }
