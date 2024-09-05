@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 @Slf4j
@@ -88,6 +89,7 @@ public class UserController {
         }
 
         newUser.setId(getNextId());
+        newUser.setFriends(new HashSet<>());
 
         // сохраняем нового пользователя в памяти приложения
         userService.put(newUser.getId(), newUser);
@@ -129,6 +131,10 @@ public class UserController {
                 oldUser.setName(newUser.getName());
             }
 
+            if (newUser.getFriends() != null) {
+                oldUser.setFriends(newUser.getFriends());
+            }
+
             return oldUser;
         }
 
@@ -137,7 +143,7 @@ public class UserController {
 
     @PutMapping("{id}/friends/{friendId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addUserFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public User addUserFriend(@PathVariable Long id, @PathVariable Long friendId) {
 
         if (id == null || friendId == null) {
             throw new NullPointerException("Не указан один из параметров");
@@ -147,13 +153,13 @@ public class UserController {
             throw new DuplicatedDataException("Нельзя добавить другом самого пользователя");
         }
         if (!userService.containsKey(id)) {
-            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
+            throw new NotFoundException("Пользователь id=" + id + " не найден, у несуществующих пользователей, нет друзей");
         }
         if (!userService.containsKey(friendId)) {
-            throw new NotFoundException("Пользователь " + friendId + "не найден, нельзя добавить другом несуществующего пользователя");
+            throw new NotFoundException("Пользователь id=" + friendId + " не найден, нельзя добавить другом несуществующего пользователя");
         }
 
-        userService.addUserFriend(id, friendId);
+        return userService.addUserFriend(id, friendId);
     }
 
     // DELETE
@@ -165,9 +171,12 @@ public class UserController {
             throw new NullPointerException("Не указан один из параметров");
         }
 
-//        if (!userService.containsKey(id)) {
-//            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
-//        }
+        if (!userService.containsKey(id)) {
+            throw new NotFoundException("Пользователь " + id + "не найден, у несуществующих пользователей, нет друзей");
+        }
+        if (!userService.containsKey(friendId)) {
+            throw new NotFoundException("Пользователь id=" + friendId + " не найден, нельзя удалить из друзей");
+        }
 
         userService.deleteUserFriend(id, friendId);
     }
@@ -176,30 +185,35 @@ public class UserController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final ValidationException e) {
+        log.debug("{}: {} -> {}", e.getClass(), e.getStackTrace(), e.getMessage());
         return new ErrorResponse("Указаны некорректные данные", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleDuplicatedDataException(final DuplicatedDataException e) {
+        log.debug("{}: {}", e.getClass(), e.getMessage());
         return new ErrorResponse("Повторяющееся значение", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        log.debug("{}: {}", e.getClass(), e.getMessage());
         return new ErrorResponse("Искомый объект не найден", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIllegalStateException(final IllegalStateException e) {
+        log.debug("{}: {}", e.getClass(), e.getMessage());
         return new ErrorResponse("Некорректное значение", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNullPointerException(final NullPointerException e) {
+        log.debug("{}: {}", e.getClass(), e.getMessage());
         return new ErrorResponse("несуществующее значение", e.getMessage());
     }
 }

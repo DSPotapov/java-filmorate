@@ -40,10 +40,11 @@ public class FilmService {
         return filmStorage.containsKey(id);
     }
 
-    public void addLike(Long id, Long userId) {
+    public Film addLike(Long id, Long userId) {
         Film film = filmStorage.get(id);
         film.getUserLikes().add(userId);
         film.setRating(film.getUserLikes().size());
+        return film;
     }
 
     public void deleteLike(Long id, Long userId) {

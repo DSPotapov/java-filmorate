@@ -9,11 +9,13 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.HashSet;
 
 @Slf4j
 @RestController
@@ -22,10 +24,12 @@ public class FilmController {
     private final LocalDate birthdayOfCinema = LocalDate.of(1895, Month.DECEMBER, 28);
 
     private final FilmService filmService;
+    private final UserService userService;
 
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(FilmService filmService, UserService userService) {
         this.filmService = filmService;
+        this.userService = userService;
     }
 
     // GET
@@ -37,7 +41,12 @@ public class FilmController {
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable Long id) {
         log.debug("id is:{}", id);
-        return filmService.get(id);
+        if (!filmService.containsKey(id)) {
+            throw new NotFoundException("Фильм " + id + "не найден.");
+        }
+        Film film = filmService.get(id);
+        log.debug("Film to get: {}", film);
+        return film;
     }
 
     @GetMapping("popular")
@@ -63,6 +72,7 @@ public class FilmController {
         }
 
         newFilm.setId(getNextId());
+        newFilm.setUserLikes(new HashSet<>());
 
         // сохраняем нового пользователя в памяти приложения
         filmService.put(newFilm.getId(), newFilm);
@@ -108,6 +118,10 @@ public class FilmController {
             oldFilm.setReleaseDate(LocalDate.parse(newFilm.getReleaseDate(), formatter).toString());
             oldFilm.setDuration(newFilm.getDuration());
 
+            if (newFilm.getUserLikes() != null) {
+                oldFilm.setUserLikes(newFilm.getUserLikes());
+            }
+
             return oldFilm;
         }
 
@@ -116,7 +130,7 @@ public class FilmController {
 
     @PutMapping("{id}/like/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
 
         if (id == null || userId == null) {
             throw new NullPointerException("Не указан один из параметров");
@@ -125,11 +139,16 @@ public class FilmController {
         if (!filmService.containsKey(id)) {
             throw new NotFoundException("Фильм " + id + "не найден");
         }
-        filmService.addLike(id, userId);
+        if (!userService.containsKey(userId)) {
+            throw new NotFoundException("Пользователь id=" + userId + " не найден, нельзя поставить от него лайк");
+        }
+
+        return filmService.addLike(id, userId);
     }
 
     // DELETE
     @DeleteMapping("{id}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
 
         if (id == null || userId == null) {
@@ -138,6 +157,9 @@ public class FilmController {
 
         if (!filmService.containsKey(id)) {
             throw new NotFoundException("Фильм " + id + "не найден");
+        }
+        if (!userService.containsKey(userId)) {
+            throw new NotFoundException("Пользователь id=" + userId + " не найден, нельзя удалить от него лайк");
         }
         filmService.deleteLike(id, userId);
     }

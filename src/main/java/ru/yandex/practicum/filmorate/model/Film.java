@@ -26,7 +26,7 @@ public class Film {
     String releaseDate;
     @Positive
     private int duration;
-    private Set<Long> userLikes;
-    private int rating = 0;
+    private Set<Long> userLikes = new HashSet<>();
+    private int rating;
 
 }

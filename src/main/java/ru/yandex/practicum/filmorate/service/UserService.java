@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -39,11 +40,12 @@ public class UserService {
         return userStorage.containsKey(id);
     }
 
-    public void addUserFriend(Long id, Long friendId) {
+    public User addUserFriend(Long id, Long friendId) {
         User user = userStorage.get(id);
         user.getFriends().add(friendId);
         User friend = userStorage.get(friendId);
         friend.getFriends().add(id);
+        return user;
     }
 
     public void deleteUserFriend(Long id, Long friendId) {
@@ -56,7 +58,14 @@ public class UserService {
     public Collection<User> getUserFriends(Long id) {
         Set<User> userFriends = new HashSet<>();
         User user = userStorage.get(id);
-        for (Long friendId : user.getFriends()) {
+        Set<Long> userFriendsId;
+        if (user.getFriends() == null) {
+            userFriendsId = new HashSet<>();
+        } else {
+            userFriendsId = user.getFriends();
+        }
+
+        for (Long friendId : userFriendsId) {
             userFriends.add(userStorage.get(friendId));
         }
         return userFriends;
@@ -65,8 +74,9 @@ public class UserService {
     public Collection<User> getCommonFriends(Long id, Long otherId) {
         Set<User> commonFriends = new HashSet<>();
         User user = userStorage.get(id);
+        Set<Long> userFriends = user.getFriends();
         Set<Long> otherUserFriends = userStorage.get(otherId).getFriends();
-        for (Long commonId : user.getFriends()) {
+        for (Long commonId : userFriends) {
             if (otherUserFriends.contains(commonId)) {
                 commonFriends.add(userStorage.get(commonId));
             }
