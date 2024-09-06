@@ -23,9 +23,10 @@ public class Film {
     private String name;
     @NotBlank
     private String description;
-    String releaseDate;
+    private String releaseDate;
     @Positive
     private int duration;
+    @Builder.Default
     private Set<Long> userLikes = new HashSet<>();
     private int rating;
 

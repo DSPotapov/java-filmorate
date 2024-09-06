@@ -163,33 +163,4 @@ public class FilmController {
         }
         filmService.deleteLike(id, userId);
     }
-
-    // ExceptionHandlers
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
-        return new ErrorResponse(
-                "Указаны некорректные данные", e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(final NotFoundException e) {
-        return new ErrorResponse(
-                "Искомый объект не найден", e.getMessage()
-        );
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIllegalStateException(final IllegalStateException e) {
-        return new ErrorResponse("Некорректное значение", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleNullPointerException(final NullPointerException e) {
-        return new ErrorResponse("Некорректное значение", e.getMessage());
-    }
 }
